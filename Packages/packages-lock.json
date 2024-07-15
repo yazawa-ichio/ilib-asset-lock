@@ -141,6 +141,13 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "jp.ilib.google-apis": {
+      "version": "https://github.com/yazawa-ichio/ilib-google-apis.git?path=Packages/jp.ilib.google-apis",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "558f6a15dc146874d2a027118baeffe8a4355f94"
+    },
     "com.unity.modules.ai": {
       "version": "1.0.0",
       "depth": 0,

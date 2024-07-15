@@ -1,0 +1,27 @@
+{
+    "name": "ILib.AssetLock.SheetDB",
+    "rootNamespace": "",
+    "references": [
+        "GUID:c6dd6e8ff48b3614796fcfc6b23f25ce",
+        "GUID:bde7b4c3d6eef1847aae2696095e0839"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "ILIB_GOOGLE_APIS"
+    ],
+    "versionDefines": [
+        {
+            "name": "jp.ilib.google-apis",
+            "expression": "",
+            "define": "ILIB_GOOGLE_APIS"
+        }
+    ],
+    "noEngineReferences": false
+}
