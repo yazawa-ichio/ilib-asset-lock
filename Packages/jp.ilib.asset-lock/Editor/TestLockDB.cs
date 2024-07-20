@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿#if ILIB_ASSET_LOCK_TEST
+using System;
+using System.Collections.Generic;
 using UnityEditor;
 
 namespace ILib.AssetLock
@@ -35,7 +37,7 @@ namespace ILib.AssetLock
 			return Get(target, path);
 		}
 
-		public void TryLock(AssetLockTarget target, string path)
+		public void TryLock(AssetLockTarget target, string path, Action onLock)
 		{
 			var data = GetData(target, path);
 			if (data.Status == LockStatus.Lock)
@@ -47,6 +49,7 @@ namespace ILib.AssetLock
 			}
 			data.Status = LockStatus.Unlock;
 			data.User = Git.User();
+			onLock?.Invoke();
 		}
 
 		public void Unlock(AssetLockTarget target, string path)
@@ -60,3 +63,4 @@ namespace ILib.AssetLock
 		public void OnGUI() { }
 	}
 }
+#endif

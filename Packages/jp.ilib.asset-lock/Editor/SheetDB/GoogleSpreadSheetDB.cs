@@ -95,7 +95,7 @@ namespace ILib.AssetLock
 			return Get(target, path);
 		}
 
-		public async void TryLock(AssetLockTarget target, string path)
+		public async void TryLock(AssetLockTarget target, string path, Action onLock)
 		{
 			try
 			{
@@ -136,6 +136,7 @@ namespace ILib.AssetLock
 					});
 				}
 				await Load();
+				onLock?.Invoke();
 				Repaint();
 			}
 			catch (Exception e)

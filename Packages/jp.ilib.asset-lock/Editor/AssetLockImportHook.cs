@@ -1,68 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.Callbacks;
-using UnityEngine;
 using UnityEngine.Pool;
 
 namespace ILib.AssetLock
 {
-	public static class AssetLockInspector
-	{
-		static ILockDB DB => AssetLockSettings.I.LockDB;
-
-		[InitializeOnLoadMethod]
-		static void Init()
-		{
-			Editor.finishedDefaultHeaderGUI -= OnHeaderGUI;
-			Editor.finishedDefaultHeaderGUI += OnHeaderGUI;
-		}
-
-		private static void OnHeaderGUI(Editor editor)
-		{
-			var path = AssetDatabase.GetAssetPath(editor.target);
-			if (!DB.TryGetLockData(path, out var lockData))
-			{
-				return;
-			}
-			var enabled = GUI.enabled;
-			GUI.enabled = true;
-			try
-			{
-				if (lockData.IsMyLock())
-				{
-					EditorGUILayout.LabelField("MyLock");
-					if (GUILayout.Button("Unlock"))
-					{
-						DB.Unlock(path);
-					}
-				}
-				else
-				{
-					EditorGUILayout.LabelField("Lock");
-					if (lockData.Status == LockStatus.Lock)
-					{
-						GUILayout.Label("User:" + lockData.User);
-						if (GUILayout.Button("TryLock"))
-						{
-							DB.TryLock(path);
-						}
-					}
-					else
-					{
-						if (GUILayout.Button("TryLock"))
-						{
-							DB.TryLock(path);
-						}
-					}
-				}
-			}
-			finally
-			{
-				GUI.enabled = enabled;
-			}
-		}
-
-	}
 
 	public class AssetLockImportHook : AssetModificationProcessor
 	{
@@ -71,8 +13,37 @@ namespace ILib.AssetLock
 		[OnOpenAsset(0)]
 		static bool OnOpen(int instanceID, int line)
 		{
-
-			return true;
+			var path = AssetDatabase.GetAssetPath(instanceID);
+			if (DB.TryGetLockData(path, out var data))
+			{
+				if (data.IsMyLock())
+				{
+					return false;
+				}
+				else
+				{
+					if (data.Status == LockStatus.Lock)
+					{
+						EditorUtility.DisplayDialog("AssetLock", $"Asset Locking {data.User}", "OK");
+					}
+					else
+					{
+						if (EditorUtility.DisplayDialog("AssetLock", $"Asset Lock?", "YES", "NO"))
+						{
+							DB.TryLock(path, () =>
+							{
+								if (DB.CanEdit(path))
+								{
+									AssetDatabase.OpenAsset(instanceID, line);
+								}
+							});
+							return true;
+						}
+					}
+					return true;
+				}
+			}
+			return false;
 		}
 
 		static bool CanOpenForEdit(string[] paths, List<string> outNotEditablePaths, StatusQueryOptions statusQueryOptions)

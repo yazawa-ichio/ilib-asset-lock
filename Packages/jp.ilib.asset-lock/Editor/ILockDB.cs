@@ -1,9 +1,11 @@
-﻿namespace ILib.AssetLock
+﻿using System;
+
+namespace ILib.AssetLock
 {
 	public interface ILockDB
 	{
 		LockData GetData(AssetLockTarget target, string path);
-		void TryLock(AssetLockTarget target, string path);
+		void TryLock(AssetLockTarget target, string path, Action onLock = null);
 		void Unlock(AssetLockTarget target, string path);
 		void OnGUI();
 	}
@@ -34,7 +36,7 @@
 			return false;
 		}
 
-		public static void TryLock(this ILockDB self, string path)
+		public static void TryLock(this ILockDB self, string path, Action onLock = null)
 		{
 			var db = self;
 			if (db == null)
@@ -46,7 +48,7 @@
 			{
 				if (target.Regex.IsMatch(path))
 				{
-					self?.TryLock(target, path);
+					self?.TryLock(target, path, onLock);
 					return;
 				}
 			}

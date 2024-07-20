@@ -13,9 +13,11 @@ namespace ILib.AssetLock
 
 		static AssetLockSettingsProvider()
 		{
-			s_LockDBTypes = TypeCache.GetTypesDerivedFrom<ILockDB>()
+			s_LockDBTypes = Enumerable.Empty<Type>()
+				.Append(default(Type))
+				.Concat(TypeCache.GetTypesDerivedFrom<ILockDB>())
 				.ToArray();
-			s_LockDBNames = s_LockDBTypes.Select(x => x.Name).ToArray();
+			s_LockDBNames = s_LockDBTypes.Select(x => x?.Name ?? "NONE").ToArray();
 		}
 
 		public static string ProjectSettingsPath => "ProjectSettings/ILib.AssetLock.";
@@ -37,16 +39,18 @@ namespace ILib.AssetLock
 			{
 				EditorGUILayout.LabelField("[LockDB]");
 				var current = settings.LockDB;
-				if (current == null && s_LockDBNames.Length > 0)
-				{
-					settings.LockDB = current = (ILockDB)Activator.CreateInstance(s_LockDBTypes[0]);
-					settings.Save();
-				}
 				var index = Array.IndexOf(s_LockDBTypes, current?.GetType());
 				var ret = EditorGUILayout.Popup(index, s_LockDBNames);
 				if (index != ret)
 				{
-					settings.LockDB = current = (ILockDB)Activator.CreateInstance(s_LockDBTypes[ret]);
+					if (ret <= 0)
+					{
+						settings.LockDB = current = null;
+					}
+					else
+					{
+						settings.LockDB = current = (ILockDB)Activator.CreateInstance(s_LockDBTypes[ret]);
+					}
 				}
 				current?.OnGUI();
 			}
