@@ -41,6 +41,7 @@ namespace ILib.AssetLock
 					Path = path,
 				};
 			}
+			lockData.TargetData = target;
 			return lockData;
 		}
 

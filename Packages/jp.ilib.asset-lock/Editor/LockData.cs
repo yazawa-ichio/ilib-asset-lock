@@ -25,7 +25,11 @@ namespace ILib.AssetLock
 
 		public LockStatus Status = LockStatus.None;
 
+		public bool EditMode;
+
 		public string GitHash;
+
+		public AssetLockTarget TargetData;
 
 		public bool IsMyLock()
 		{

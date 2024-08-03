@@ -3,12 +3,21 @@ using System.Text.RegularExpressions;
 
 namespace ILib.AssetLock
 {
+	public enum LockType
+	{
+		DontSave,
+		DontOpen,
+		AllowSave,
+	}
+
 	[Serializable]
 	public class AssetLockTarget
 	{
 		public string Category;
 
 		public string Pattern;
+
+		public LockType Type;
 
 		[NonSerialized]
 		string m_RegexPattern;

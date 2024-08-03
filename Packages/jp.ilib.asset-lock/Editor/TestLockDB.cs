@@ -27,6 +27,7 @@ namespace ILib.AssetLock
 				lockData = data.Data[path] = new LockData()
 				{
 					Path = path,
+					TargetData = target,
 				};
 			}
 			return lockData;

@@ -68,6 +68,7 @@ namespace ILib.AssetLock
 							delete = target;
 						}
 					}
+					target.Type = (LockType)EditorGUILayout.EnumPopup("Type", target.Type);
 				}
 				if (delete != null)
 				{

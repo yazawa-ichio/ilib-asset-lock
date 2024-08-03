@@ -72,10 +72,39 @@ namespace ILib.AssetLock
 			}
 		}
 
+		public static bool CanOpen(this ILockDB self, string path)
+		{
+			if (self.TryGetLockData(path, out var data))
+			{
+				if (data.TargetData.Type == LockType.DontOpen)
+				{
+					return data.IsMyLock();
+				}
+			}
+			return true;
+		}
+
 		public static bool CanEdit(this ILockDB self, string path)
 		{
 			if (self.TryGetLockData(path, out var data))
 			{
+				if (data.TargetData.Type == LockType.DontOpen)
+				{
+					return data.IsMyLock();
+				}
+				return data.EditMode || data.IsMyLock();
+			}
+			return true;
+		}
+
+		public static bool CanSave(this ILockDB self, string path)
+		{
+			if (self.TryGetLockData(path, out var data))
+			{
+				if (data.TargetData.Type == LockType.AllowSave)
+				{
+					return true;
+				}
 				return data.IsMyLock();
 			}
 			return true;

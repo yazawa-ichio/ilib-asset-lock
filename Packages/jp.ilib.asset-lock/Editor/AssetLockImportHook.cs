@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEditor.Callbacks;
+using UnityEngine;
 using UnityEngine.Pool;
 
 namespace ILib.AssetLock
@@ -32,7 +34,7 @@ namespace ILib.AssetLock
 						{
 							DB.TryLock(path, () =>
 							{
-								if (DB.CanEdit(path))
+								if (DB.CanOpen(path))
 								{
 									AssetDatabase.OpenAsset(instanceID, line);
 								}
@@ -40,7 +42,7 @@ namespace ILib.AssetLock
 							return true;
 						}
 					}
-					return true;
+					return !DB.CanOpen(path);
 				}
 			}
 			return false;
@@ -74,15 +76,23 @@ namespace ILib.AssetLock
 			return !hasLock;
 		}
 
+
 		static bool MakeEditable(string[] paths, string prompt, List<string> outNotEditablePaths)
 		{
 			bool hasLock = false;
 			foreach (var item in paths)
 			{
-				if (!DB.CanEdit(item))
+				if (!DB.CanSave(item))
 				{
-					hasLock = true;
-					outNotEditablePaths.Add(item);
+					if (EditorUtility.DisplayDialog("AssetLock", $"Asset Lock?", "YES", "NO"))
+					{
+						DB.TryLock(item);
+					}
+					if (!DB.CanSave(item))
+					{
+						hasLock = true;
+						outNotEditablePaths.Add(item);
+					}
 				}
 			}
 			return !hasLock;
@@ -99,9 +109,26 @@ namespace ILib.AssetLock
 					editablePaths.Add(item);
 					continue;
 				}
-				if (!DB.CanEdit(item))
+				if (!DB.CanSave(item))
 				{
 					hasLock = true;
+					Debug.LogWarning($"Skip Save {item}");
+					if (!item.EndsWith(".unity"))
+					{
+						EditorApplication.delayCall += () =>
+						{
+							foreach (var obj in AssetDatabase.LoadAllAssetsAtPath(item))
+							{
+								if (obj is not GameObject && obj is not Component)
+								{
+									Resources.UnloadAsset(obj);
+								}
+							}
+							new FileInfo(item).LastWriteTime = new FileInfo(item).LastWriteTime.AddSeconds(1);
+							AssetDatabase.ImportAsset(item, ImportAssetOptions.ForceUpdate);
+							Debug.LogWarning($"Reimport {item}");
+						};
+					}
 				}
 				else
 				{
